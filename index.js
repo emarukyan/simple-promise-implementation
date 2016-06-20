@@ -49,6 +49,25 @@ var Promise = function (callback) {
   return this.__initialCall()
 }
 
+Promise.all = function (promises) {
+  return new Promise(function (resolve, reject) {
+    var pending = promises.length;
+    var results = new Array(pending);
+    promises.forEach(function (promise, index) {
+      promise.then(function (result) {
+        --pending;
+        results[index] = result;
+        if (!pending) {
+          resolve(results);
+        }
+      }).catch(function (err) {
+        pending = Infinity;
+        reject(err);
+      })
+    })
+  })
+}
+
 // Assume we have some callback function that sometimes returns error
 function someCallBackFunction (options, cb) {
   if (parseInt(Math.random() * 10, 10) % 2 === 0) {
