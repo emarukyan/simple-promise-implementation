@@ -51,18 +51,24 @@ var Promise = function (callback) {
 
 Promise.all = function (promises) {
   return new Promise(function (resolve, reject) {
-    var pending = promises.length;
-    var results = new Array(pending);
-    promises.forEach(function (promise, index) {
-      promise.then(function (result) {
-        --pending;
-        results[index] = result;
+    var rejected = false
+    var pending = promises.length
+    var results = new Array(pending)
+    promises.map((promise, i) => {
+      promise().then(function (result) {
+        --pending
+        results[i] = result
         if (!pending) {
-          resolve(results);
+          resolve(results)
         }
       }).catch(function (err) {
-        pending = Infinity;
-        reject(err);
+        pending = Infinity
+        if (rejected) {
+          // do nothing
+        } else {
+          rejected = true
+          reject(err)
+        }
       })
     })
   })
@@ -102,3 +108,15 @@ callbackFunction2Promise().then(data => {
 }).catch(err => {
   console.log(err.stack)
 })
+
+// Promise all test!
+Promise.all([
+  callbackFunction2Promise,
+  callbackFunction2Promise,
+  callbackFunction2Promise]).then(results => {
+    console.log('Promise All results')
+    console.log(results)
+  }).catch(err => {
+    console.log('Promise All err')
+    console.log(err)
+  })
